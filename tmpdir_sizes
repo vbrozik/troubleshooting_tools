@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# log number of files in directories
+# userful for watching of excessive growth of temporary directories
+# normal usage: watch -n300 tmpdir_sizes
+
+logfile=/var/tmp/ted_tmpdir_sizes.log
+
+curtime="$(date --rfc-3339=s)"
+
+{
+  printf '%s' "$curtime"
+  for dir in "$FWDIR/tmp/"{email_tmp/,} /tmp/scrub/ ; do
+    printf ' %6d' "$(ls "$dir" | wc -l)"
+  done
+  printf '\n'
+} | tee -a "$logfile"
