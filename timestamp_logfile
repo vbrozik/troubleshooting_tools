@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# The script continuously reads the origignal logfile
+# and adds a timestamp to the beginning of evey line.
+
+# Usage:
+# nohup ./timestamp_logfile &
+
+# TODO
+# 1. timestamped log rotation
+# 2. investigate possible unwanted script termination
+
+# original logfile directory
+: ${dirorig=/opt/CPsuite-R77/fw1/log}
+# timestamped logfile directory
+: ${dirtstamp=$dirorig}
+
+# original logfile
+: ${logorig=$dirorig/emaild.mta.elg}
+# timestamped logfile
+: ${logtstamp=$dirtstamp/emaild.mta.timestamped.elg}
+
+tail -F "$logorig" |
+  while true ; do
+    while read ; do
+      printf '%s\n' "$(date --rfc-3339=s) $REPLY"
+    done
+    sleep 10
+  done >>"$logtstamp"
