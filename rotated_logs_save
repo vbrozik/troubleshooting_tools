@@ -31,11 +31,11 @@ rotated_log_save () {
   fi
 }
 
-rotated_logs_save
+rotated_log_save
 
 if test "$run_repeatedly" = true ; then
   while true ; do
     sleep "$check_interval"
-    rotated_logs_save
+    rotated_log_save
   done
 fi
