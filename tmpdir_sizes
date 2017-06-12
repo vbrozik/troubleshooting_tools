@@ -5,12 +5,14 @@
 # normal usage: watch -n300 tmpdir_sizes
 
 logfile=/var/tmp/ted_tmpdir_sizes.log
+dirlist="$FWDIR/tmp/email_tmp/ $FWDIR/tmp/ /tmp/scrub/"
 
 curtime="$(date --rfc-3339=s)"
 
 {
   printf '%s' "$curtime"
-  for dir in "$FWDIR/tmp/"{email_tmp/,} /tmp/scrub/ ; do
+  #for dir in "$FWDIR/tmp/"{email_tmp/,} /tmp/scrub/ ; do
+  for dir in $dirlist ; do
     printf ' %6d' "$(ls "$dir" | wc -l)"
   done
   printf '\n'

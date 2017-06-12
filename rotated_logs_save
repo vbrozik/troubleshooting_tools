@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# rotated_logs_save
+# save a log file after rotation by moving it to a new location
+
+: ${orig_logdir=/var/log}
+: ${orig_log=maillog}
+: ${orig_suffix=.0}
+
+: ${new_suffix=.saved}
+: ${new_logdir="$orig_logdir"}
+: ${new_log="$orig_log"}
+
+: ${date_format=_%FT%H-%M-%S}
+: ${run_repeatedly=false}
+  # false - runs once (to be run by a scheduler)
+  # true - runs repeatedly
+
+: ${check_interval=600} # interval of checking for a new rotated file in seconds
+
+# Check Point scheduler:
+# cpd_sched_config add MaillogSave -c "/home/vbrozik/scripts/rotated_logs_save" -e 600 -r -s
+
+
+orig_logfile="$orig_logdir/$orig_log$orig_suffix"
+
+rotated_log_save () {
+  if test -f "$orig_logfile" ; then
+    new_logfile="$new_logdir/$new_log$new_suffix$(date "+$date_format")"
+    mv -v "$orig_logfile" "$new_logfile"
+  fi
+}
+
+rotated_logs_save
+
+if test "$run_repeatedly" = true ; then
+  while true ; do
+    sleep "$check_interval"
+    rotated_logs_save
+  done
+fi
