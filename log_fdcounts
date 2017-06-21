@@ -2,7 +2,8 @@
 
 # logs number of file descriptors opened by a process
 
-watched_pid="$(pidof in.emaild.mta)"
+watched_procname=in.emaild.mta
+#watched_pid="$(pidof "$watched_procname")"
 logfile=/var/log/emaild-fdcounts.log
 
 interval_list=1
@@ -16,7 +17,7 @@ while true ; do
   max=0
   sum=0
   for i in $(seq "$interval_log") ; do
-    count="$(ls "/proc/$watched_pid/fd/" | wc -l)"
+    count="$(ls "/proc/$(pidof "$watched_procname")/fd/" | wc -l)"
     : $((sum = sum + count))
     : $((max = count > max ? count : max))
     sleep "$interval_list"
