@@ -11,7 +11,7 @@
 : ${new_logdir="$orig_logdir"}
 : ${new_log="$orig_log"}
 
-: ${date_format=_%FT%H-%M-%S}
+: ${date_format=_%FT%H%M%S}
 : ${run_repeatedly=false}
   # false - runs once (to be run by a scheduler)
   # true - runs repeatedly
@@ -23,6 +23,18 @@
 
 
 orig_logfile="$orig_logdir/$orig_log$orig_suffix"
+
+# sed program to convert ISO8601 date-time to a format suitable for file names
+# and still compliant to ISO8601
+sed_isotimecondensed='
+s/\(-[0-9][0-9]\) \([0-9][0-9]:\)/\1T\2/
+# separate date and time by "T"
+s/\(T[0-9][0-9]\):\([0-9][0-9]\):\([0-9][0-9]\)/\1\2\3/
+# remove ":" separators from time (not allowed in Windows file names)
+s/\(T[0-9]\{6\}\)[.,]\([0-9]\{1,2\}\)[0-9]*/\1.\2/
+# pass only up to hundredths of seconds
+s/\([0-9.]\{1,\}\) \([+-][0-9]\)/\1\2/
+# remove space separator before time zone'
 
 rotated_log_save () {
   if test -f "$orig_logfile" ; then

@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# shell_service
+# control shell daemons
+
+ällservices="timestamp_logfile log_fdcounts"
+
+case "$2" in
+  sh)
+    cmdpref="/bin/sh ./"
+    ;;
+  gen)
+  *)
+    exit 1
+    ;;
+esac
+
+case "$1" in
+  start)
+    ;;
+  stop)
+    ;;
+  restart)
+    ;;
+  status)
+    pgrep -fl "$cmdpref$3"
+    ;;
+  *)
+    exit 1
+    ;;
+esac

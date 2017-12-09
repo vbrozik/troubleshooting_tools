@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# disk usage by last modification time
+
+dir=/var/app_data/moved/opt_trend_imss_temp/scan
+maxhrs=10
+
+for hrs in $(seq "$maxhrs") ; do
+  minstart="$(( hrs*60 ))"
+  minend="$(( (hrs+1)*60 ))"
+  printf '% 3d % 4d % 6s\n' \
+    "$hrs"
+    "$(find "$dir" -mmin +"$minstart" -mmin -"$minend" -printf \\n | wc -l)" \
+    "$(find "$dir" -mmin +"$minstart" -mmin -"$minend" -exec du -ch {} + | tail -n1 | cut -f1)"
+done
