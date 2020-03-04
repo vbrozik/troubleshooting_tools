@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # log number of files in directories
-# userful for watching of excessive growth of temporary directories
+# useful for watching of excessive growth of temporary directories
 # normal usage: watch -n300 tmpdir_sizes
 
 logfile=/var/tmp/ted_tmpdir_sizes.log
