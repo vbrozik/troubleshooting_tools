@@ -17,3 +17,8 @@ Reads newly created lines in a log file and prepends them with a timestamp.
 Counts number of files in selected directories. Can be scheduled
 to run periodically. This utility is useful to observe situations in which
 large number of files can cause software failures.
+
+## `http_monitor`
+
+Continuously probe given address:port destinations using given HTTP request.
+Checks the response using a given regex like in F5 LTM HTTP monitor.

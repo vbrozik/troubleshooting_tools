@@ -1,0 +1,75 @@
+#!/bin/sh
+
+# http_monitor
+#
+# HTTP monitor test
+# Continuously probe given address:port destinations using given HTTP request.
+# Checks the response using the given regex (resp_regex) like in F5 HTTP monitor.
+
+# TODO
+# - check exact response matching on F5
+# - add CLI arguments and/or config file
+
+destinations='10.60.1.41:9080 10.60.1.42:9080'
+
+# printf formatted request
+# shellcheck disable=SC2016  # Characters $ are part of the string.
+request='GET /IBS/blank.htm HTTP/1.1\r\n$WSSN: ibs.q-bank.loc\r\n$WSSP: 443\r\n$WSIS: true\r\nConnection: close\r\n\r\n'
+resp_regex='^HTTP/1.1\s[2-3]'
+
+interval=1
+log_file=http_monitor.log
+
+resp_file=tmp-resp.txt
+ncat_out_file=tmp-ncat-out.txt
+
+ncat='nc'
+prog_name=http_monitor
+
+# ---
+
+handle_req () {
+    dst_ip="${1%:*}"
+    dst_port="${1##*:}"
+    # shellcheck disable=SC2059  # $request uses printf escape sequences
+    printf "$request" | "$ncat" -v "$dst_ip" "$dst_port" >"$resp_file" 2>"$ncat_out_file"
+}
+
+test_resp () {
+    grep -Eq "$resp_regex" "$resp_file"
+}
+
+cleanup () {
+    date +"%FT%T --- Stopping $prog_name, probes: $probes, ncat errors: $ncat_errs, response errors: $resp_errs" | tee -a "$log_file"
+    trap - EXIT HUP INT
+    exit 0
+}
+
+probes=1
+ncat_errs=0
+resp_errs=0
+trap cleanup EXIT HUP INT
+
+date +"%FT%T --- Starting $prog_name, targets: $destinations, interval: $interval s" |
+    tee -a "$log_file"
+while true ; do
+    printf '%d\r' "$probes"
+    for dst in $destinations ; do
+        if ! handle_req "$dst" ; then
+            # sending the request failed
+            date +"%FT%T Failed sending the request to $dst, netcat output:" | tee -a "$log_file"
+            tee -a "$log_file" <"$ncat_out_file"
+            ncat_errs=$((ncat_errs + 1))
+        else
+            if ! test_resp ; then
+                # the response did not match
+                date +"%FT%T Failed test response from $dst follows" | tee -a "$log_file"
+                tee -a "$log_file" <"$resp_file"
+                printf '%s\n' '------ response end ------' | tee -a "$log_file"
+                resp_errs=$((resp_errs + 1))
+            fi
+        fi
+    done
+    probes=$((probes + 1))
+    sleep "$interval"
+done
